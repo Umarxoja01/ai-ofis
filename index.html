@@ -119,6 +119,7 @@ body.present .left{grid-template-rows:minmax(0,1fr)}
     <div class="brand"><h1>AI OFIS</h1><span class="pill" id="modePill" hidden>Namuna</span><span class="clock" id="clock">--:--</span></div>
     <div class="btns">
       <button class="btn" id="btnLink" type="button">Ulash</button>
+      <button class="btn" id="btnVideo" type="button" aria-pressed="false">Video rejimi</button>
       <button class="btn" id="btnDay" type="button" aria-pressed="false">Kun</button>
       <button class="btn" id="btnReset" type="button">Umumiy ko‘rinish</button>
       <button class="btn" id="btn916" type="button" aria-pressed="false">9:16 kadr</button>
@@ -298,7 +299,19 @@ $("linkForm").addEventListener("submit",e=>{e.preventDefault();const u=$("linkUr
   if(!k){$("linkErr").textContent="Parolni kiriting.";$("linkErr").hidden=false;return;}
   try{localStorage.setItem("aiofis-live-v1",JSON.stringify({url:u,key:k}));}catch(err){$("linkErr").textContent="Brauzer saqlashga ruxsat bermadi.";$("linkErr").hidden=false;return;}
   location.reload();});
-if(isLive()){$("modePill").hidden=false;$("modePill").textContent="Jonli";$("modeNote").textContent="Jonli: buyruqlar n8n’dagi agentlarga ketadi. Hozircha Dilnoza (Buxgalter) ulangan.";$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
+if(isLive()){$("modePill").hidden=false;$("modePill").textContent="Jonli";updateNote();$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
+
+/* ---------- video rejimi (kontent uchun yengil faoliyat) ---------- */
+var videoOn=false,videoTimer=null;
+function updateNote(){const n=$("modeNote");if(!n)return;
+  if(isLive())n.textContent="Jonli: buyruqlar n8n’dagi agentlarga ketadi. Hozircha Dilnoza (Buxgalter) ulangan."+(videoOn?" Video rejimi yoqiq: qo‘shimcha namuna faoliyat ko‘rsatilmoqda.":"");
+  else n.textContent=videoOn?"Video rejimi: kontent uchun namuna faoliyat ko‘rsatilmoqda.":"Ofis n8n’ga ulanmagan. Buyruq berish uchun «Ulash» tugmasini bosing.";}
+function videoTick(){if(!videoOn)return;
+  if(AGENTS.filter(a=>a.state!=="idle").length<2){const free=AGENTS.filter(a=>a.state==="idle"&&!a.queue.length);
+    if(free.length){const a=free[Math.floor(Math.random()*free.length)];const tk=a.tasks[Math.floor(Math.random()*a.tasks.length)];a.queue.push({t:tk.t,r:tk.r,ap:tk.ap,demo:true});a.until=0;}}
+  videoTimer=setTimeout(videoTick,rand(5000,9000));}
+function setVideo(on){videoOn=on;$("btnVideo").setAttribute("aria-pressed",String(on));clearTimeout(videoTimer);if(on)videoTimer=setTimeout(videoTick,800);updateNote();}
+$("btnVideo").addEventListener("click",()=>setVideo(!videoOn));
 
 /* ---------- simulation (namuna) ---------- */
 const t0=nowS();
@@ -306,8 +319,8 @@ AGENTS.forEach((a,i)=>{a.state="idle";a.ti=Math.floor(Math.random()*a.tasks.leng
 QA.state="idle";QA.checking=null;QA.queue=[];
 function startQA(a){const job=a.queue.shift();if(!job)return;a.userJob=job;a.jobUntil=nowS()+6;renderRow(a);}
 function step(a,t){
-  if(a.state==="idle"){if(!a.queue.length){a.until=Infinity;return;}const q=a.queue.shift();a.task=q||a.tasks[a.ti%a.tasks.length];a.state="work";a.until=t+(q?rand(5,7):rand(7,12));log(a,(q?"buyruqni bajaryapti: ":"boshladi: ")+a.task.t.replace("Sizning buyrug‘ingiz: ",""));}
-  else if(a.state==="work"){if(a.task.ap){a.state="wait";a.until=t+rand(4,6.5);log(a,"tasdiq kutyapti: "+a.task.r);}else{a.state="done";a.until=t+rand(3,4.5);a.last=a.task.r;doneCount++;log(a,a.task.r);if(world)world.celebrate(a);}}
+  if(a.state==="idle"){if(!a.queue.length){a.until=Infinity;return;}const q=a.queue.shift();a.task=q||a.tasks[a.ti%a.tasks.length];a.state="work";a.until=t+(q&&q.demo?rand(6,10):q?rand(5,7):rand(7,12));if(q&&q.user)log(a,"buyruqni bajaryapti: "+a.task.t.replace("Sizning buyrug‘ingiz: ",""));}
+  else if(a.state==="work"){if(a.task.ap){a.state="wait";a.until=t+rand(4,6.5);if(!a.task.demo)log(a,"tasdiq kutyapti: "+a.task.r);}else{a.state="done";a.until=t+rand(3,4.5);a.last=a.task.r;doneCount++;log(a,a.task.r);if(world)world.celebrate(a);}}
   else if(a.state==="wait"){a.state="done";a.until=t+3.5;a.last=a.task.r;doneCount++;log(a,"tasdiqlandi: "+a.task.r);if(world)world.celebrate(a);}
   else{a.state="idle";if(!a.task.user)a.ti++;a.until=t+(a.queue.length?.3:rand(2,5));}
   a.doneAt=a.state==="done"?t:a.doneAt;renderRow(a);renderCounts();if(selected===a.id)renderDetail();
@@ -321,6 +334,7 @@ setInterval(()=>{$("clock").textContent=hhmm();},1000);$("clock").textContent=hh
 const hasGL=(()=>{try{const c=document.createElement("canvas");return !!(window.THREE&&THREE.GLTFLoader&&(c.getContext("webgl")||c.getContext("experimental-webgl")));}catch(e){return false;}})();
 if(!hasGL){$("loadTx").textContent="Brauzeringiz 3D grafikani ko‘rsata olmayapti. Buyruq paneli va jamoa ro‘yxati baribir ishlaydi.";$("loadBar").parentNode.hidden=true;setInterval(()=>simTick(nowS()),250);return;}
 world=buildWorld();
+setInterval(()=>simTick(nowS()),300);
 
 function buildWorld(){
   const stage=$("stage"),canvas=$("c"),labels=$("labels");

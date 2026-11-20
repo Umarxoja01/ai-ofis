@@ -1,0 +1,19 @@
+Furniture models - all CC0 1.0 Universal (Public Domain), verified on each poly.pizza model page (2026-11-20).
+https://creativecommons.org/publicdomain/zero/1.0/
+
+file                          | title             | creator    | page                          | source GLB
+desk_kenney.glb               | Desk              | Kenney     | https://poly.pizza/m/6PbVkqPzEU | https://static.poly.pizza/0716218b-3aae-48e6-8ddd-185cf7f7b7d7.glb
+desk_chair_kenney.glb         | Desk Chair        | Kenney     | https://poly.pizza/m/CKSz6PB1vO | https://static.poly.pizza/64699642-a4c2-4850-9c4b-558a328ed1bf.glb
+computer_screen_kenney.glb    | Computer Screen   | Kenney     | https://poly.pizza/m/V5Qo141OcB | https://static.poly.pizza/2af0158d-c560-4b1a-92e3-b50a51149b16.glb
+keyboard_kenney.glb           | Computer Keyboard | Kenney     | https://poly.pizza/m/vsqTUPFSw6 | https://static.poly.pizza/b5e7fa01-9e1b-4d5c-a894-8c1c01d19e2d.glb
+laptop_kenney.glb             | Laptop            | Kenney     | https://poly.pizza/m/GnbwSUiVty | https://static.poly.pizza/8190e659-7079-442f-9ed9-083f67b1746b.glb
+plant_small_kenney.glb        | Plant Small       | Kenney     | https://poly.pizza/m/4f6vwL8vo9 | https://static.poly.pizza/b892ee12-370d-4dae-aa14-d377b89f9413.glb
+potted_plant_kenney.glb       | Potted Plant      | Kenney     | https://poly.pizza/m/23Dx9CC95C | https://static.poly.pizza/6482596c-6423-415d-bfd5-e66bcc546642.glb
+lounge_sofa_kenney.glb        | Lounge Sofa       | Kenney     | https://poly.pizza/m/jMu2iCmGxU | https://static.poly.pizza/f47310a0-4d22-48a3-a2ce-62f67bcc998d.glb
+lamp_round_floor_kenney.glb   | Lamp Round Floor  | Kenney     | https://poly.pizza/m/8LiDIfXVLi | https://static.poly.pizza/98dd45a1-0682-4d44-83d1-32fa2a4fca5b.glb
+bookcase_open_kenney.glb      | Bookcase Open     | Kenney     | https://poly.pizza/m/MTH8ZwnA27 | https://static.poly.pizza/867fee8d-2b89-4383-92f9-58660a76d29a.glb
+rug_rectangle_kenney.glb      | Rug Rectangle     | Kenney     | https://poly.pizza/m/k5oJLb49gw | https://static.poly.pizza/bbccb6a6-5194-41fa-9614-f02d01879496.glb
+office_chair_q.glb            | Office Chair      | Quaternius | https://poly.pizza/m/UfKvrZBK6C | https://static.poly.pizza/ac2301f3-af86-435a-885a-d8f1a32f9f76.glb
+desk_q.glb                    | Desk              | Quaternius | https://poly.pizza/m/V86Go2rlnq | https://static.poly.pizza/91c2bf8d-0876-4801-abd3-8dd5d017ecbd.glb
+computer_large_q.glb          | Computer Large    | Quaternius | https://poly.pizza/m/or4LLmesjq | https://static.poly.pizza/ca940c59-bbc0-4bbc-9ba0-4bdb7387f916.glb
+houseplant_q.glb              | Houseplant        | Quaternius | https://poly.pizza/m/bfLOqIV5uP | https://static.poly.pizza/1683c0b1-4dd9-4d45-910e-cf3e46f163f5.glb

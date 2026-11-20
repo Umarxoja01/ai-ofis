@@ -116,7 +116,7 @@ body.present .left{grid-template-rows:minmax(0,1fr)}
 
 <div class="app">
   <header class="bar">
-    <div class="brand"><h1>AI OFIS</h1><span>Umarning AI jamoasi</span><span class="pill" id="modePill">Namuna</span><span class="clock" id="clock">--:--</span></div>
+    <div class="brand"><h1>AI OFIS</h1><span>Umarning AI jamoasi</span><span class="pill" id="modePill" hidden>Namuna</span><span class="clock" id="clock">--:--</span></div>
     <div class="btns">
       <button class="btn" id="btnLink" type="button">Ulash</button>
       <button class="btn" id="btnDay" type="button" aria-pressed="false">Kun</button>
@@ -299,7 +299,7 @@ $("linkForm").addEventListener("submit",e=>{e.preventDefault();const u=$("linkUr
   if(!k){$("linkErr").textContent="Parolni kiriting.";$("linkErr").hidden=false;return;}
   try{localStorage.setItem("aiofis-live-v1",JSON.stringify({url:u,key:k}));}catch(err){$("linkErr").textContent="Brauzer saqlashga ruxsat bermadi.";$("linkErr").hidden=false;return;}
   location.reload();});
-if(isLive()){$("modePill").textContent="Jonli";$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
+if(isLive()){$("modePill").hidden=false;$("modePill").textContent="Jonli";$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
 
 /* ---------- simulation (namuna) ---------- */
 const t0=nowS();

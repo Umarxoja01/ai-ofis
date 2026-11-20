@@ -165,7 +165,7 @@ body.present .left{grid-template-rows:minmax(0,1fr)}
         <h2>Faoliyat lentasi</h2>
         <ol class="feed" id="feed"></ol>
       </section>
-      <p class="note">Bu namuna. Vazifalar va javoblar ko‘rinishni sinash uchun yozilgan, buyruqlar hali haqiqiy agentlarga bormaydi. Doimiy versiyada buyruq n8n’dagi agentga yuboriladi va javob shu yerda chiqadi.</p>
+      <p class="note" id="modeNote">Ofis n8n’ga ulanmagan. Buyruq berish uchun «Ulash» tugmasini bosing.</p>
       <p class="credits">3D modellar: Quaternius, Kenney (CC0). Yorug‘lik: three.js RoomEnvironment.</p>
     </aside>
   </div>
@@ -244,7 +244,7 @@ let selected=null,doneCount=0,world=null,target="all";
 ALL.forEach(a=>{const b=document.createElement("button");b.type="button";b.className="row";b.style.setProperty("--c",a.color);
   b.innerHTML='<span class="sw"></span><b></b><span class="st"></span><span class="task"></span>';b.addEventListener("click",()=>select(a.id));listEl.appendChild(b);a.rowEl=b;});
 const title=a=>a.name+" · "+a.role;
-const curText=a=>a.walker?(a.userJob?a.userJob.t:a.checking?a.checking.name+" ishini tekshiryapti":"Ofisni aylanyapti"):(a.state==="idle"?(a.last?"Oxirgi: "+a.last:"Navbatdagi ishni kutyapti"):a.task.t);
+const curText=a=>a.walker?(a.userJob?a.userJob.t:a.checking?a.checking.name+" ishini tekshiryapti":"Ofisni aylanyapti"):(a.state==="idle"?(a.last?"Oxirgi: "+a.last:"Buyruq kutyapti"):a.task.t);
 function renderRow(a){const b=a.rowEl.querySelector("b");b.textContent=a.name+" ";const s=document.createElement("span");s.textContent=a.role;b.appendChild(s);
   a.rowEl.style.setProperty("--s",stColor(a));a.rowEl.querySelector(".st").textContent=STATUS[a.state].label;a.rowEl.querySelector(".task").textContent=curText(a);
   if(a.tagEl){a.tagEl.querySelector("b").textContent=a.name;a.tagEl.querySelector("small").textContent=a.role;}}
@@ -276,8 +276,7 @@ function setTarget(id){target=id;renderChips();const a=ALL.find(x=>x.id===id),q=
 function resultFor(a,text){const all=(a.quick||[]).concat(GROUP_QUICK);const m=all.find(([q])=>q.toLowerCase()===text.toLowerCase());return(m?m[1]:"Buyruq bajarildi")+" (namuna javob)";}
 function send(text){text=(text||"").trim();if(!text)return;const list=target==="all"?ALL:[ALL.find(a=>a.id===target)];log(target==="all"?null:list[0],text,true);
   if(isLive()){list.forEach(a=>{if(LIVE_IDS.indexOf(a.id)>=0)liveAsk(a,text);else{log(a,"Hali ishga tushmaganman. Agentim tayyor bo‘lgach javob beraman.");if(world)world.say(a,"Tez kunda!");}});$("cmdInput").value="";return;}
-  list.forEach(a=>{a.queue=a.queue||[];a.queue.push({t:"Sizning buyrug‘ingiz: "+text,r:resultFor(a,text),user:true});if(world)world.say(a,"Qabul qildim!");
-    if(a.walker){if(!a.userJob)startQA(a);}else if(a.state==="idle"||a.state==="done"){a.until=0;}});$("cmdInput").value="";}
+  log({name:"Ofis",color:"#D9B36C"},"n8n’ga ulanmagan. Buyruq yuborish uchun «Ulash» tugmasini bosing.");$("cmdInput").value="";openLink();}
 $("cmdForm").addEventListener("submit",e=>{e.preventDefault();send($("cmdInput").value);});
 
 /* ---------- live mode (n8n) ---------- */
@@ -299,15 +298,15 @@ $("linkForm").addEventListener("submit",e=>{e.preventDefault();const u=$("linkUr
   if(!k){$("linkErr").textContent="Parolni kiriting.";$("linkErr").hidden=false;return;}
   try{localStorage.setItem("aiofis-live-v1",JSON.stringify({url:u,key:k}));}catch(err){$("linkErr").textContent="Brauzer saqlashga ruxsat bermadi.";$("linkErr").hidden=false;return;}
   location.reload();});
-if(isLive()){$("modePill").hidden=false;$("modePill").textContent="Jonli";$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
+if(isLive()){$("modePill").hidden=false;$("modePill").textContent="Jonli";$("modeNote").textContent="Jonli: buyruqlar n8n’dagi agentlarga ketadi. Hozircha Dilnoza (Buxgalter) ulangan.";$("modePill").classList.add("live");$("btnLink").textContent="Ulangan";}
 
 /* ---------- simulation (namuna) ---------- */
 const t0=nowS();
 AGENTS.forEach((a,i)=>{a.state="idle";a.ti=Math.floor(Math.random()*a.tasks.length);a.task=a.tasks[a.ti];a.last=null;a.until=t0+2+i*1.2;a.queue=[];});
-QA.state="work";QA.checking=null;QA.queue=[];
+QA.state="idle";QA.checking=null;QA.queue=[];
 function startQA(a){const job=a.queue.shift();if(!job)return;a.userJob=job;a.jobUntil=nowS()+6;renderRow(a);}
 function step(a,t){
-  if(a.state==="idle"){if(isLive()&&!a.queue.length){a.until=Infinity;return;}const q=a.queue.shift();a.task=q||a.tasks[a.ti%a.tasks.length];a.state="work";a.until=t+(q?rand(5,7):rand(7,12));log(a,(q?"buyruqni bajaryapti: ":"boshladi: ")+a.task.t.replace("Sizning buyrug‘ingiz: ",""));}
+  if(a.state==="idle"){if(!a.queue.length){a.until=Infinity;return;}const q=a.queue.shift();a.task=q||a.tasks[a.ti%a.tasks.length];a.state="work";a.until=t+(q?rand(5,7):rand(7,12));log(a,(q?"buyruqni bajaryapti: ":"boshladi: ")+a.task.t.replace("Sizning buyrug‘ingiz: ",""));}
   else if(a.state==="work"){if(a.task.ap){a.state="wait";a.until=t+rand(4,6.5);log(a,"tasdiq kutyapti: "+a.task.r);}else{a.state="done";a.until=t+rand(3,4.5);a.last=a.task.r;doneCount++;log(a,a.task.r);if(world)world.celebrate(a);}}
   else if(a.state==="wait"){a.state="done";a.until=t+3.5;a.last=a.task.r;doneCount++;log(a,"tasdiqlandi: "+a.task.r);if(world)world.celebrate(a);}
   else{a.state="idle";if(!a.task.user)a.ti++;a.until=t+(a.queue.length?.3:rand(2,5));}

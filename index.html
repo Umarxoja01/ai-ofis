@@ -429,13 +429,14 @@ function buildWorld(){
 
   /* ------- loading ------- */
   const loader=new THREE.GLTFLoader();
-  const files={};AGENTS.concat([QA]).forEach(a=>files[a.model]=1);
-  ["furniture/desk_q.glb","furniture/office_chair_q.glb","furniture/computer_screen_kenney.glb","furniture/keyboard_kenney.glb","furniture/potted_plant_kenney.glb","furniture/plant_small_kenney.glb",
-   "furniture/houseplant_q.glb","furniture/lounge_sofa_kenney.glb","furniture/lamp_round_floor_kenney.glb","furniture/bookcase_open_kenney.glb","furniture/computer_large_q.glb","furniture/laptop_kenney.glb"].forEach(f=>files[f]=1);
-  const names=Object.keys(files);let doneN=0;const G={};
-  const url=f=>A+"web/"+f.split("/").pop().replace(/\.glb$/,".gltf.json");
-  const loadOne=f=>new Promise(res=>{loader.load(url(f),gl=>{G[f]=gl;doneN++;$("loadBar").style.width=(doneN/names.length*100)+"%";res();},undefined,err=>{console.warn("Yuklanmadi:",f,err);doneN++;res();});});
-  Promise.all(names.map(loadOne)).then(()=>{try{populate();}catch(e){console.error(e);}$("loading").hidden=true;$("hint").hidden=false;});
+  const FURN=["furniture/desk_q.glb","furniture/office_chair_q.glb","furniture/computer_screen_kenney.glb","furniture/keyboard_kenney.glb","furniture/potted_plant_kenney.glb","furniture/plant_small_kenney.glb",
+   "furniture/houseplant_q.glb","furniture/lounge_sofa_kenney.glb","furniture/lamp_round_floor_kenney.glb","furniture/bookcase_open_kenney.glb","furniture/computer_large_q.glb","furniture/laptop_kenney.glb"];
+  const G={};let doneN=0;
+  const USE_GLB=/github\.io$/.test(location.hostname)||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const url=f=>{const n=f.split("/").pop();return USE_GLB?A+"glb/"+n:A+"web/"+n.replace(/\.glb$/,".gltf.json");};
+  const loadOne=f=>new Promise(res=>{loader.load(url(f),gl=>{G[f]=gl;res(gl);},undefined,err=>{console.warn("Yuklanmadi:",f,err);res(null);});});
+  Promise.all(FURN.map(f=>loadOne(f).then(()=>{doneN++;$("loadBar").style.width=(doneN/FURN.length*100)+"%";}))).then(()=>{try{populate();}catch(e){console.error(e);}$("loading").hidden=true;$("hint").hidden=false;
+    ALL.forEach(a=>loadOne(a.model).then(gl=>{if(gl){try{addPerson(a);}catch(e){console.error(e);}}}));});
 
   /* place helper: wraps a model, centers it on x/z, puts it on the floor */
   function place(f,{s=1,x=0,y=0,z=0,ry=0,recolor=null,parent=scene,mat=null}={}){
@@ -471,7 +472,10 @@ function buildWorld(){
     else if(arms==="rest"){rotW(b["UpperArm.L"],AX,-.45);rotW(b["UpperArm.R"],AX,-.45);rotW(b["LowerArm.L"],AX,-.85);rotW(b["LowerArm.R"],AX,-.85);}}
 
   /* ------- populate scene once models are in ------- */
-  const people={},hitTargets=[],animProps=[];let qa=null;
+  const people={},hitTargets=[],animProps=[],screens={};let qa=null;
+  function addPerson(a){const p=makePerson(a);if(!p)return;
+    if(a.walker){qa=p;qa.root.position.set(-8.6,0,-2.0);const h=new THREE.Mesh(new THREE.BoxGeometry(1,2.2,1),new THREE.MeshBasicMaterial({visible:false}));h.position.y=1.1;h.userData.id="qa";qa.root.add(h);hitTargets.push(h);return;}
+    p.root.position.set(a.x,0,a.z-.12);p.root.position.y=.6-p.hipY;p.screen=screens[a.id];people[a.id]=p;}
   function populate(){
     // lounge
     place("furniture/lounge_sofa_kenney.glb",{s:2.3,x:-9.6,z:5.0,ry:-Math.PI/2,recolor:{carpet:"#7b3f22",wood:"#2a1a12"}});
@@ -507,9 +511,9 @@ function buildWorld(){
       ring.rotation.x=-Math.PI/2;ring.position.set(0,.02,.3);g.add(ring);statusRings[a.id]=ring;
       const hit=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.8,2.6),new THREE.MeshBasicMaterial({visible:false}));hit.position.set(0,1.4,.3);hit.userData.id=a.id;g.add(hit);hitTargets.push(hit);
       const pr=makeProp(a,g);if(pr)animProps.push(pr);
-      const p=makePerson(a);if(p){p.root.position.set(a.x,0,a.z-.12);p.root.position.y=.6-p.hipY;p.screen=sg;people[a.id]=p;}
+      screens[a.id]=sg;
     });
-    qa=makePerson(QA);if(qa){qa.root.position.set(-9,0,-1.45);const h=new THREE.Mesh(new THREE.BoxGeometry(1,2.2,1),new THREE.MeshBasicMaterial({visible:false}));h.position.y=1.1;h.userData.id="qa";qa.root.add(h);hitTargets.push(h);}
+    
     // labels
     ALL.forEach(a=>{const d=document.createElement("button");d.type="button";d.className="tag";d.style.setProperty("--c",a.color);
       d.innerHTML='<span class="dot"></span><b></b><small></small>';d.querySelector("b").textContent=a.name;d.querySelector("small").textContent=a.role;d.addEventListener("click",()=>select(a.id));labels.appendChild(d);a.tagEl=d;});
